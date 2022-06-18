@@ -30,6 +30,8 @@ public class AppMonitor extends Service {
 
     private static final int SLEEP_TIME = 9999;
     private static int messageId = 1;
+    private static int SLEEP_FORB_TIMES = 6;
+    private static final int MINS_TO_MILLISEC = 60000; // 1000 * 60
     private final String CHANNEL_LOGIC_ID = "Logic Service ID";
 
     private void checkMap(Map<String, UsageStats> stats) {
@@ -42,9 +44,10 @@ public class AppMonitor extends Service {
 
             assert usageStats != null;
 
-            if (currApp.isForbidden()) {
+            if (currApp.isForbidden())
+            {
                 if (System.currentTimeMillis() - usageStats.getLastTimeVisible() <= SLEEP_TIME) {
-                    if (currApp.getOverTimeLimited() == 5)
+                    if (currApp.getOverTimeLimited() == SLEEP_FORB_TIMES)
                     {
                         sendNotification("Хватит тут сидеть, выходи!",
                                 CHANNEL_LOGIC_ID,
@@ -62,7 +65,7 @@ public class AppMonitor extends Service {
                 continue;
             }
 
-            if (usageStats.getTotalTimeVisible() >= currApp.getTimeLimit())
+            if ((usageStats.getTotalTimeVisible() - currApp.getStartTimeMeasured())>= (long) (currApp.getTimeLimit()) * MINS_TO_MILLISEC)
             {
                 // Send a notification
                 sendNotification("Для " + currApp.getName() + " время использования вышло. Остановитесь!",
@@ -143,6 +146,9 @@ public class AppMonitor extends Service {
     private void checkApplicationsActivity(){
         PackageManager packageManager = getPackageManager();
         List<ApplicationInfo> applicationInfoList = packageManager.getInstalledApplications(0);
+
+        // TO DO: Clear overlimited at 00:00!
+        // Update StartTimeMeasured at 00:00!!
         UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
 
         Calendar calendar = Calendar.getInstance();
@@ -151,7 +157,6 @@ public class AppMonitor extends Service {
         long end = System.currentTimeMillis();
         Map<String, UsageStats> stats = usageStatsManager.queryAndAggregateUsageStats(start, end);
 
-        // TO DO: Clear overlimited at 00:00!
         checkMap(stats);
     }
 

@@ -4,6 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +18,23 @@ import android.widget.Toast;
 import com.example.dz.model.App;
 import com.google.android.material.slider.Slider;
 
+import java.util.Calendar;
+import java.util.Map;
+
 public class AppPage extends AppCompatActivity {
+
+    private long getStartAppTime(String pName)
+    {
+        UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
+        long start = calendar.getTimeInMillis();
+        long end = System.currentTimeMillis();
+        Map<String, UsageStats> stats = usageStatsManager.queryAndAggregateUsageStats(start, end);
+
+        return stats.get(pName).getTotalTimeVisible();
+    }
 
     private App currApp;
     private boolean isUpdate;
@@ -73,10 +92,13 @@ public class AppPage extends AppCompatActivity {
             } else {
                 currApp.setIsEnable(false);
 
-                if (isUpdate)
+                if (isUpdate) {
                     AppsBuffer.INSTANCE.appsMap.replace(pName, currApp);
-                else
+                }
+                else {
+                    currApp.setStartTimeMeasured(getStartAppTime(pName));
                     AppsBuffer.INSTANCE.appsMap.put(pName, currApp);
+                }
 
                 appTimeLimitText.setVisibility(View.INVISIBLE);
                 appTimeLimitSlider.setVisibility(View.INVISIBLE);
@@ -110,10 +132,13 @@ public class AppPage extends AppCompatActivity {
             currApp.setIsEnable(true);
             currApp.setTimeLimit((int) appTimeLimitSlider.getValue());
 
-            if (isUpdate)
+            if (isUpdate) {
                 AppsBuffer.INSTANCE.appsMap.replace(pName, currApp);
-            else
+            }
+            else {
+                currApp.setStartTimeMeasured(getStartAppTime(pName));
                 AppsBuffer.INSTANCE.appsMap.put(pName, currApp);
+            }
 
             applySettingsButton.setVisibility(View.INVISIBLE);
 

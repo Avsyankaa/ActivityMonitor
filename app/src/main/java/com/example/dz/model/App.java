@@ -13,6 +13,7 @@ public class App{
 
     private       boolean      isForbidden;
     private       int          overTimeLimited;
+    private       long         startTimeMeasured;
 
     public App(String packageName, Drawable logo, CharSequence name,
                boolean isEnable, int timeLimit) {
@@ -24,6 +25,7 @@ public class App{
 
         this.isForbidden = false;
         this.overTimeLimited = 0;
+        this.startTimeMeasured = 0;
     }
 
     public String getPackageName() { return packageName; }
@@ -49,4 +51,8 @@ public class App{
     public boolean isForbidden() { return isForbidden; }
 
     public void setIsForbidden(boolean isForbidden) { this.isForbidden = isForbidden; }
+
+    public long getStartTimeMeasured()  { return this.startTimeMeasured; }
+
+    public void setStartTimeMeasured(long startTimeMeasured)  { this.startTimeMeasured = startTimeMeasured; }
 }
