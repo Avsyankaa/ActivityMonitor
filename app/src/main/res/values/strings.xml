@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">DZ</string>
+    <string name="app_name">Activity Monitor</string>
+    <string name="time_limit_text">Ограничение времени использования (в минутах):</string>
+    <string name="apply_button">Применить</string>
 </resources>
